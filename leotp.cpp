@@ -629,7 +629,7 @@ void LeotpTransCB::flushDataHoles()
         if (_itimediff(current, iter->ts) >= LEOTP_HOLE_WAIT)
         {
 
-            LOG(DEBUG, " Send retran interest [%u,%u], waiting time %ld ", iter->startByte, iter->endByte,_itimediff(current,iter->ts));
+            LOG(TRACE, " Send retran interest [%u,%u], waiting time %ld ", iter->startByte, iter->endByte,_itimediff(current,iter->ts));
 #ifdef HBH_CC
             parseInt(iter->startByte, iter->endByte);
 #else
@@ -921,7 +921,7 @@ int LeotpTransCB::input(char *data, int size)
             }
 #endif
             if(nodeRole==LEOTP_ROLE_RESPONDER)
-                LOG(DEBUG, "%u recv int %u [%u,%u) %u rSR %.1f",
+                LOG(TRACE, "%u recv int %u [%u,%u) %u rSR %.1f",
                     _getMillisec(), sn, rangeStart, rangeEnd, rangeEnd - rangeStart, rmtSendRate);
             if (!(rangeStart == 0 && rangeEnd == 0))
             {
@@ -995,7 +995,7 @@ int LeotpTransCB::input(char *data, int size)
             seg->rangeEnd = rangeEnd;
             if (data_header)
             {
-                LOG(DEBUG, " recv header [%u,%u]", rangeStart, rangeEnd);
+                LOG(TRACE, " recv header [%u,%u]", rangeStart, rangeEnd);
                 parseData(seg, data_header);
             }
             else if (rangeEnd - rangeStart != len)
