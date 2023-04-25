@@ -12,7 +12,7 @@ make
 ````
 3. Run the application-layer program of LEOTP:
 After step 2, application-layer programs of different role are generated, which are `appserver`, `appclient`, and `appmid`.
-We assume the topology of an entire link is $$h1-gs1-m1-m2-\cdots-mk-gs2-h2$$
+We assume the topology of an entire link is $h1-gs1-m1-m2-\cdots-mk-gs2-h2$
 
 
 
