@@ -7,7 +7,6 @@
 
 
 int provideData(IUINT32 start, IUINT32 end, void *_sessPtr){
-    
     LOG(TRACE,"insert [%d,%d)",start,end);
     LeotpSess *sessPtr = (LeotpSess*)_sessPtr;
     char *dataBuf = new char[end-start];
@@ -48,7 +47,7 @@ int main(){
     flushBeforeExit();
     Cache cache(QUAD_STR_LEN);
     ByteMap<shared_ptr<LeotpSess>> sessMap;
-    LOG(INFO,"entering intcps");
+    LOG(INFO,"entering LEOTP appserver");
     fflush(stdout);
     startResponder(&cache,&sessMap,onNewSess,provideData,
             "10.0.100.2", DEFAULT_SERVER_PORT);

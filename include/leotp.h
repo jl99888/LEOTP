@@ -45,7 +45,7 @@ using namespace std;
 #define LEOTP_CC_SLOW_START 0
 #define LEOTP_CC_CONG_AVOID 1
 
-const IUINT32 LEOTP_OVERHEAD = 23;            //LEOTP header length
+const IUINT32 LEOTP_OVERHEAD = 19;            //LEOTP header length
 const IUINT32 LEOTP_MTU = 1472;               //UDP MTU
 const IUINT32 LEOTP_MSS = LEOTP_MTU - LEOTP_OVERHEAD;   //LEOTP MTU
 const IUINT32 LEOTP_INT_RANGE_LIMIT = LEOTP_MSS;  
@@ -94,8 +94,7 @@ struct LeotpSeg
     IUINT32 cmd;         //need send,1B
     IINT16 wnd;          //need send,2B
     IUINT32 ts;          //need send,4B
-    IUINT32 sn;          //need send,4B
-    IUINT32 len;         //need send,4B
+    IUINT32 len;         //need send,4B, to be removed
     IUINT32 rangeStart;  //need send,4B 
     IUINT32 rangeEnd;    //need send,4B 
     IUINT32 xmit;    // do not send, only keep in intbuf
@@ -186,10 +185,8 @@ private:
     // exponential
     int conseqTimeout;
 
-    // hop-by-hop sn hole
-	IUINT32 dataNextSn, intNextSn;
-    list<Hole> dataHoles, intHoles;
-  
+    // sequence number holes
+    list<Hole> dataHoles;
     IUINT32 dataNextRangeStart;
 
     /* ----- hop-by-hop Congestion Control ----- */
@@ -280,7 +277,7 @@ private:
     
     bool allow_cwnd_increase();
     bool allow_cwnd_decrease(IUINT32 current);
-    
+
 //---------------------------------------------------------------------
 // API
 //---------------------------------------------------------------------

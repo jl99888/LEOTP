@@ -18,8 +18,6 @@ LeotpTransCB::LeotpTransCB(
                      fetchDataFunc(_fetchDataFunc),
                      onUnsatInt(_onUnsatInt),
                      nodeRole(_nodeRole),
-                     dataNextSn(0),
-                     intNextSn(0),
                      rcvNxt(0),
                      cwnd(LEOTP_CWND_MIN),
                      state(0),
@@ -98,7 +96,6 @@ int LeotpTransCB::outputInt(IUINT32 rangeStart, IUINT32 rangeEnd,IUINT16 wnd, IU
         segPtr->wnd = wnd;
     }
 #endif
-    segPtr->sn = intNextSn++;
     segPtr->len = 0;
     encodeSeg(tmpBuffer.get(), segPtr.get());
     return output(tmpBuffer.get(), LEOTP_OVERHEAD, LEOTP_ROLE_RESPONDER);
@@ -112,13 +109,9 @@ char *LeotpTransCB::encodeSeg(char *ptr, const LeotpSeg *seg)
     ptr = encode8u(ptr, (IUINT8)seg->cmd);
     ptr = encode16(ptr, seg->wnd);
     ptr = encode32u(ptr, seg->ts);
-    ptr = encode32u(ptr, seg->sn);
     ptr = encode32u(ptr, seg->len);
-
-    // intcp
     ptr = encode32u(ptr, seg->rangeStart);
     ptr = encode32u(ptr, seg->rangeEnd);
-
     return ptr;
 }
 
@@ -206,7 +199,7 @@ int LeotpTransCB::sendData(const char *buffer, IUINT32 start, IUINT32 end)
         start += size;
         sndQueue.push_back(seg);
         sndQueueBytes += (LEOTP_OVERHEAD+ seg->len);
-        LOG(TRACE, "sendData sn %d [%d,%d) ,ts %u, sndQ %u,", seg->sn, seg->rangeStart, seg->rangeEnd,_getMillisec(),sndQueueBytes/LEOTP_MSS);
+        LOG(TRACE, "sendData [%d,%d) ,ts %u, sndQ %u,", seg->rangeStart, seg->rangeEnd,_getMillisec(),sndQueueBytes/LEOTP_MSS);
         buffer += size;
         len -= size;
     }
@@ -879,8 +872,7 @@ int LeotpTransCB::input(char *data, int size)
     // if multiple intcp segs are concatenated in this single udp packet,
     // and they have different dst, there will be error.
     // so, now we only allow one intcp seg per input().
-    // while (1) {
-    IUINT32 ts, sn, len;
+    IUINT32 ts, len;
     IUINT32 rangeStart, rangeEnd; // intcp
     IINT16 wnd;
     IUINT8 cmd;
@@ -897,7 +889,6 @@ int LeotpTransCB::input(char *data, int size)
         data = decode8u(data, &cmd);
         data = decode16(data, &wnd);
         data = decode32u(data, &ts);
-        data = decode32u(data, &sn);
         data = decode32u(data, &len);
         data = decode32u(data, &rangeStart);
         data = decode32u(data, &rangeEnd);
@@ -921,8 +912,8 @@ int LeotpTransCB::input(char *data, int size)
             }
 #endif
             if(nodeRole==LEOTP_ROLE_RESPONDER)
-                LOG(TRACE, "%u recv int %u [%u,%u) %u rSR %.1f",
-                    _getMillisec(), sn, rangeStart, rangeEnd, rangeEnd - rangeStart, rmtSendRate);
+                LOG(TRACE, "%u recv int [%u,%u) %u rSR %.1f",
+                    _getMillisec(), rangeStart, rangeEnd, rangeEnd - rangeStart, rmtSendRate);
             if (!(rangeStart == 0 && rangeEnd == 0))
             {
                 LOG(TRACE,"recv int [%u,%u]",rangeStart,rangeEnd);
@@ -1005,7 +996,7 @@ int LeotpTransCB::input(char *data, int size)
             }
             else
             {
-                LOG(TRACE, "recv data %d [%d,%d), ts %u", sn, rangeStart, rangeEnd,_getMillisec());
+                LOG(TRACE, "recv data [%d,%d), ts %u", rangeStart, rangeEnd,_getMillisec());
                 cf = _getUsec();
                 memcpy(seg->data, data, len);
                 parseData(seg, data_header);
@@ -1041,7 +1032,6 @@ void LeotpTransCB::flushIntQueue()
         shared_ptr<LeotpSeg> newseg = createSeg(0);
         assert(newseg);
         newseg->len = 0;
-        newseg->sn = 0;
         newseg->cmd = LEOTP_CMD_INT;
         newseg->xmit = 0;
 
@@ -1288,8 +1278,6 @@ void LeotpTransCB::flushData()
             sentEnd = tmpBuffer.get();
         }
 
-        segPtr->sn = dataNextSn++;
-
 #ifdef HBH_CC
         segPtr->ts = _getMillisec() - intHopOwd;
 #else
@@ -1304,7 +1292,7 @@ void LeotpTransCB::flushData()
             segPtr->wnd = getIntDev();
             LOG(TRACE, "%d %d", sndQueueBytes, segPtr->wnd);
         }
-        LOG(TRACE, "flushData sn %d [%d,%d), ts %u, wnd %d, sndQ %u", segPtr->sn, segPtr->rangeStart, segPtr->rangeEnd, segPtr->ts, segPtr->wnd, sndQueueBytes/LEOTP_MSS);
+        LOG(TRACE, "flushData [%d,%d), ts %u, wnd %d, sndQ %u", segPtr->rangeStart, segPtr->rangeEnd, segPtr->ts, segPtr->wnd, sndQueueBytes/LEOTP_MSS);
         sentEnd = encodeSeg(sentEnd, segPtr.get());
         memcpy(sentEnd, segPtr->data, segPtr->len);
         sentEnd += segPtr->len;
