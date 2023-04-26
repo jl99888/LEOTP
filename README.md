@@ -14,8 +14,13 @@ make
 ````
 3. Run the application-layer program of LEOTP:
 
-After step 2, application-layer programs of different role are generated in directory `app`, which are `appserver`, `appclient`, and `appmid`.
-Supposing the topology of an entire link is $h1-gs1-m1-m2-\cdots-mk-gs2-h2$, where h1 and h2 are endpoints, gs1 and gs2 are ground stations, and m1~mk are LEO satellites. First, run `appmid` on all ground stations and satellites to enable segmented transport control. Then, run `appserver` on h2 to start server program. Last, run `appclient` to request data from the server. For simplification, we assume the ip addresses of the client and the sever are 10.0.1.1 and 10.0.100.2 respectively. When running on your own testbed or simulation environment, change those addresses correctly in `app/appclient.cpp` and `app/appserver.cpp` first.  
+After step 2, three application-layer programs of different role are generated in directory `app`, which are `appserver`, `appclient`, and `appmid`. To run them, use commands:
+````
+./appserver -s serverip
+./appmid
+./appclient -c clientip -s serverip
+````
+Supposing the topology of an entire link is $h1-gs1-m1-m2-\cdots-mk-gs2-h2$, where h1 and h2 are endpoints, gs1 and gs2 are ground stations, and m1~mk are LEO satellites. First, run `appmid` on all ground stations and satellites to enable segmented transport control. Then, run `appserver` on h2 to start server program. Last, run `appclient` to request data from the server. we assume the default ip addresses of the client and the sever are 10.0.1.1 and 10.0.100.2 respectively. When running on your own testbed or simulation environment, use `-c` and `-s` options to configure those addresses correctly.
 
 
 
