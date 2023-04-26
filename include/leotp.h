@@ -335,7 +335,6 @@ public:
     int peekSize();
 };
 
-
 float bytesToMbit(int bytes);
 int mbitToBytes(float mbit);
 

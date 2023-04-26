@@ -1,5 +1,7 @@
 # <b>LEOTP</b>
 This is the code of paper "LEOTP: An Information-centric Transport Layer Protocol for LEO Satellite Networks" in ICDCS'23. LEOTP is based on a request-response model and in-network caching. The in-network retransmission provides a minimal cost of delay and bandwidth consumption for loss recovery. The backpressure-based hop-by-hop congestion control provides accurate traffic control, avoiding congesiton in the network while maximizing link utilization. Thus, LEOTP can achieve high throughput and low latency in LEO satellite networks. More details of LEOTP can be found in the paper.
+### <b>Requirements</b>
+The code nees to be compiled and run under LINUX OS (e.g., Ubuntu 20.04).
 ### <b>Instructions</b>
 1. Clone this repository:
 ````

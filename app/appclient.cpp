@@ -6,12 +6,13 @@
 //#include <getopt.h>
 #undef LOG_LEVEL
 #define LOG_LEVEL DEBUG
-//#define FLOW_TEST
+
 
 using namespace std;
 
 //extern char* optarg;
 char clientAddr[20] = "10.0.1.1";
+char serverAddr[20] = "10.0.100.2";
 
 IUINT32 _round_up(IUINT32 x,IUINT32 y){
     return ((x+y-1)/y)*y;
@@ -20,11 +21,6 @@ IUINT32 _round_up(IUINT32 x,IUINT32 y){
 void request_func(LeotpSess * _sessPtr){
     int sendStart = 0, ret;
     while(1){
-#ifdef FLOW_TEST
-        if(sendStart > TOTAL_DATA_LEN)
-            break;
-#endif
-        //if(sendStart<10000)
         ret = _sessPtr->request(sendStart, sendStart+REQ_LEN);
         if(ret == -1){// intBuf is full
             LOG(TRACE,"intBuf is full");
@@ -60,13 +56,6 @@ void *onNewSess(void* _sessPtr){
             recvedBytes += (end-start);
         IUINT32 curTime = _getMillisec();
         if(printTime==0||curTime-printTime>CheckInterval){
-            if(printTime!=0){
-                //NOTE
-                // printf("%4ds %.2f Mbits/sec receiver\n",
-                //         int((curTime - startTime)/1000),
-                //         bytesToMbit(recvedBytes)*1000/(curTime-printTime)
-                // );
-            }
             recvedBytes = 0;
             printTime = curTime;
         }
@@ -85,12 +74,6 @@ void *onNewSess(void* _sessPtr){
             IUINT32 recvTime = *((IUINT32 *)(recvBuf+pos-start+sizeof(IUINT32)*2));
             IUINT32 firstTs = *((IUINT32 *)(recvBuf+pos-start+sizeof(IUINT32)*3));
             curTime = _getMillisec();
-            // LOG(TRACE, "recv [%d,%d)\n", start, end);
-
-            // if(recvTime<1000){
-            //LOG(TRACE,"recv [%d,%d) xmit %u intcpRtt %u owd_noOrder %u sendTime %u recvTime %u curTime %u owd_obs %u\n",pos,pos+REQ_LEN,xmit,recvTime-firstTs,recvTime-sendTime,sendTime,recvTime,curTime, curTime-sendTime);
-                // abort();
-            // }
             fflush(stdout);
             pos += REQ_LEN;
         }
@@ -101,10 +84,13 @@ void *onNewSess(void* _sessPtr){
 int main(int argc,char** argv){
     int ch;
     
-    while((ch=getopt(argc,argv,"c:"))!=-1){
+    while((ch=getopt(argc,argv,"c:s:"))!=-1){
         switch(ch){
             case 'c':
-                strncpy(clientAddr,optarg,19);
+                strncpy(clientAddr, optarg, 19);
+                break;
+            case 's':
+                strncpy(serverAddr,optarg, 19);
                 break;
             default:
                 printf("unkown option\n");
@@ -115,9 +101,9 @@ int main(int argc,char** argv){
     flushBeforeExit();
     Cache cache(QUAD_STR_LEN);
     ByteMap<shared_ptr<LeotpSess>> sessMap;
-    LOG(INFO,"entering intcpc\n");
-    LOG(INFO,"client ip:%s\n",clientAddr);
+    LOG(INFO,"entering LEOTP appclient\n");
+    LOG(INFO,"request from client %s -> server %s\n",clientAddr, serverAddr);
     startRequester(&cache,&sessMap,onNewSess,
-        (const char*)clientAddr,"10.0.100.2",DEFAULT_SERVER_PORT);
+        (const char*)clientAddr,(const char*)serverAddr, DEFAULT_SERVER_PORT);
     return 0;
 }

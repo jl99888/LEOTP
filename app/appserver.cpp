@@ -5,6 +5,7 @@
 #undef LOG_LEVEL
 #define LOG_LEVEL DEBUG
 
+char serverAddr[20] = "10.0.100.2";
 
 int provideData(IUINT32 start, IUINT32 end, void *_sessPtr){
     LOG(TRACE,"insert [%d,%d)",start,end);
@@ -25,32 +26,31 @@ int provideData(IUINT32 start, IUINT32 end, void *_sessPtr){
 }
 
 void *onNewSess(void* _sessPtr){
+    // do nothing
     LOG(INFO,"");
-    /*
-    IntcpSess *sessPtr = (IntcpSess*)_sessPtr;
-    char dataBuf[TOTAL_DATA_LEN];
-    
-    int start = 0;
-    while(1){
-         memset(dataBuf,0,REQ_LEN);
-         *((IUINT32 *)dataBuf) = getMillisec();
-         sessPtr->insertData(dataBuf,start,start+REQ_LEN);
-         LOG(TRACE,"insert %d %d\n",start,start+REQ_LEN);
-         start += REQ_LEN;
-         usleep(1*1000*REQ_INTV);
-     }
-    */
     return nullptr;
 }
 
-int main(){
+int main(int argc,char** argv){
+    int ch;
+    while((ch=getopt(argc,argv,"s:"))!=-1){
+        switch(ch){
+            case 's':
+                strncpy(serverAddr,optarg, 19);
+                break;
+            default:
+                printf("unkown option\n");
+                break;
+        }
+    }
+
     flushBeforeExit();
     Cache cache(QUAD_STR_LEN);
     ByteMap<shared_ptr<LeotpSess>> sessMap;
     LOG(INFO,"entering LEOTP appserver");
     fflush(stdout);
     startResponder(&cache,&sessMap,onNewSess,provideData,
-            "10.0.100.2", DEFAULT_SERVER_PORT);
+            (const char*)serverAddr, DEFAULT_SERVER_PORT);
 
     // udpRecvLoop(&args);
     return 0;

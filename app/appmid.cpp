@@ -43,9 +43,8 @@ int main(int argc,char **argv){
 
     Cache cache(QUAD_STR_LEN);
     ByteMap<shared_ptr<LeotpSess>> sessMap;
-    LOG(INFO,"entering intcpm\n");
+    LOG(INFO,"entering LEOTP midnode\n");
     fflush(stdout);
     startMidnode(&cache,&sessMap,onNewSess,DEFAULT_MID_PORT);
-    
     return 0;
 }
