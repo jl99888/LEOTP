@@ -317,6 +317,7 @@ void LeotpTransCB::updateRTT(IINT32 rtt, int xmit)
 
 void LeotpTransCB::updateHopRTT(IINT32 hop_rtt)
 {
+    LOG(TRACE, "rtt=%d hopsrtt=%d", hop_rtt, hopSrtt);
     if (hopSrtt == 0)
     {
         hopSrtt = hop_rtt;
@@ -787,7 +788,7 @@ void LeotpTransCB::parseData(shared_ptr<LeotpSeg> dataSeg, bool data_header)
         }
         if (intUseful == 0)
         {
-            LOG(DEBUG, "useless data recved [%u,%u)", dataSeg->rangeStart, dataSeg->rangeEnd);
+            LOG(TRACE, "useless data recved [%u,%u)", dataSeg->rangeStart, dataSeg->rangeEnd);
         }
     }
     else
@@ -1167,7 +1168,7 @@ void LeotpTransCB::flushIntBuf()
             {
                 if (segPtr->xmit > 0)
                 { // 1
-                    LOG(DEBUG, "----- Timeout [%d,%d) xmit %d cur %u rto %d -----",
+                    LOG(TRACE, "----- Timeout [%d,%d) xmit %d cur %u rto %d -----",
                         segPtr->rangeStart, segPtr->rangeEnd, segPtr->xmit, _getMillisec(), rto);
                 }
                 if (segPtr->xmit >= LEOTP_DEADLINK)

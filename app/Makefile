@@ -1,18 +1,23 @@
 DIR_SRC =  ../
-APP = appclient appmid appserver
-all: $(APP)
-objs = api.o cache.o leotp.o udp_leotp.o
-appclient: ${objs} appclient.cpp
-	g++ appclient.cpp  ${objs} -o appclient -lpthread -g -std=c++11
-appmid: ${objs} appmid.cpp
-	g++ appmid.cpp  ${objs} -o appmid -lpthread -g -std=c++11
-appserver: ${objs} appserver.cpp
-	g++ appserver.cpp  ${objs} -o appserver -lpthread -g -std=c++11
+OBJ = api.o cache.o leotp.o udp_leotp.o
+EXE = appclient appmid appserver
+CC = g++ -std=c++11
+FLAGS = -lpthread -g 
+
+all: $(EXE)
+ 
+appclient: ${OBJ} appclient.cpp
+	$(CC) -o $@ $^  $(FLAGS)
+
+appmid: ${OBJ} appmid.cpp
+	$(CC) -o $@ $^  $(FLAGS)
+
+appserver: ${OBJ} appserver.cpp
+	$(CC) -o $@ $^  $(FLAGS)
+
 %.o: ${DIR_SRC}/%.cpp
-	g++ -c $< -lpthread -g -std=c++11
+	$(CC) -c $< $(FLAGS)
+
 clean:
-	rm -f *.o
-	rm -f appclient
-	rm -f appmid
-	rm -f appserver
+	rm -f $(OBJ) $(EXE)
 
